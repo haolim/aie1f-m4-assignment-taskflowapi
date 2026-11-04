@@ -6,17 +6,6 @@ A simple task management REST API built with Spring Boot for the Module 3 assign
 
 - Java 21
 - Maven
-- An OpenAI API key
-
-## Setup
-
-The app needs the `OPENAI_API_KEY` environment variable to start, so this line has been added to the `application.properties` file:
-
-    spring.ai.openai.api-key=${OPENAI_API_KEY}
-
-To set your key, add this line to `~/.bashrc`, then restart the terminal:
-
-    export OPENAI_API_KEY=your-key-here
 
 ## Run
 
@@ -34,7 +23,6 @@ The API runs at `http://localhost:8080`.
 | PUT | /api/tasks/{id} | Update a task |
 | DELETE | /api/tasks/{id} | Delete a task |
 | PUT | /api/tasks/{id}/complete | Mark a task as complete |
-| GET | /api/tasks/summary | AI summary of pending and completed tasks |
 
 Requests for a missing id return 404.
 
