@@ -25,5 +25,5 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 # document the intended container port (optional as the actual port is defined by spring boot config)
 EXPOSE 8080
-# start the application
+# command use when start the application
 CMD ["java", "-jar", "app.jar"]

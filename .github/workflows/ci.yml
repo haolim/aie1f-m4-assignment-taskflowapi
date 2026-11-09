@@ -1,0 +1,88 @@
+name: build_test_publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # build job - compile and package
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Java 21 and cach Maven dependencies
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+        
+      - name: Install dependencies and build
+        run: |
+          echo "Building the application..."
+          mvn clean install -DskipTests
+        
+  # test job - run automated test with a new setup
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Java 21 and cache Maven dependencies
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          mvn test
+      
+      - name: Save test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: target/surefire-reports
+
+  # publish job - build and push docker image
+  publish:
+    runs-on: ubuntu-latest
+    needs: test
+    env:
+      DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+      DOCKER_TOKEN: ${{secrets.DOCKER_TOKEN}}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Read version from pom.xml file
+        id: version
+        run: |
+          echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+        
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image..."
+          docker build \
+            -t $DOCKER_USERNAME/taskflowapi:${{steps.version.outputs.VERSION}} \
+            -t $DOCKER_USERNAME/taskflowapi:latest .
+          
+      - name: Push to Docker Hub
+        run: |
+          echo "Logging in to Docker Hub..."
+          echo "$DOCKER_TOKEN" | docker login -u $DOCKER_USERNAME --password-stdin
+          echo "Pushing image to Docker Hub..."
+          docker push $DOCKER_USERNAME/taskflowapi:${{steps.version.outputs.VERSION}}
+          docker push $DOCKER_USERNAME/taskflowapi:latest
+          
