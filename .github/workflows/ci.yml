@@ -86,3 +86,5 @@ jobs:
           docker push $DOCKER_USERNAME/taskflowapi:${{steps.version.outputs.VERSION}}
           docker push $DOCKER_USERNAME/taskflowapi:latest
           
+      - name: Trigger Render deploy
+        run: curl -fsS -X POST "${{secrets.RENDER_DEPLOY_HOOK}}"
