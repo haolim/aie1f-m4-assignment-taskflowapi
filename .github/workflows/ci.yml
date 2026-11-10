@@ -57,6 +57,25 @@ jobs:
           name: test-reports
           path: target/surefire-reports
 
+      - name: Scan repo with Trivy (dependencies, secrets, Dockerfile)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-fs.sarif
+          exit-code: '1'
+        
+      - name: Upload Trivy repo results
+        if: always()
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
   # publish job - build and push docker image
   publish:
     runs-on: ubuntu-latest
