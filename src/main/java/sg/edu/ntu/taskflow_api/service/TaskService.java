@@ -2,7 +2,6 @@ package sg.edu.ntu.taskflow_api.service;
 
 import java.util.List;
 
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
 import sg.edu.ntu.taskflow_api.exceptions.TaskNotFoundException;
@@ -13,11 +12,9 @@ import sg.edu.ntu.taskflow_api.repository.TaskRepository;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final ChatClient chatClient;
 
-    public TaskService(TaskRepository taskRepository, ChatClient.Builder chatclientBuilder) {
+    public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
-        this.chatClient = chatclientBuilder.build();
     }
 
     public List<Task> findAllTasks() {
@@ -57,12 +54,4 @@ public class TaskService {
         taskToMarkAsCompleted.setIsCompleted(true);
         return taskRepository.save(taskToMarkAsCompleted);
     }
-
-    public String summarizeTasks(List<Task> tasks) {
-        return chatClient.prompt()
-                .user("Give a short summary of which tasks are pending and which are completed: " + tasks)
-                .call()
-                .content();
-    }
-
 }

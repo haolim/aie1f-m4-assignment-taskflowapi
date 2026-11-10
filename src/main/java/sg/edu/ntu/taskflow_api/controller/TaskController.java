@@ -62,12 +62,4 @@ public class TaskController {
         Task t = taskService.markTaskAsComplete(id);
         return ResponseEntity.status(HttpStatus.OK).body(t);
     }
-
-    @GetMapping("/summary")
-    public ResponseEntity<String> getTaskSummary() {
-        List<Task> t = taskService.findAllTasks();
-        String res = taskService.summarizeTasks(t);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
-    }
-
 }
